@@ -48,7 +48,7 @@ export class ApiStack extends Stack {
   }
 
   private createSearchEndpoint() {
-    const lambda = new Function(this, 'FilesFunction', {
+    const lambda = new Function(this, 'SearchFunction', {
       runtime: Runtime.NODEJS_20_X,
       code: Code.fromAsset(resolve(process.cwd(), 'dist/get-search-result')),
       handler: 'index.handler',
