@@ -2,6 +2,7 @@ import { Cache } from '@app/cache';
 import { CONFIG } from '@common/config';
 import { Character, CharacterResponse } from './types/character';
 import { Starship } from './types/starship';
+import { ImageService } from '@services/image';
 
 type SwapiResponse = {
   next: string | null;
@@ -14,7 +15,7 @@ export class SwapiService {
     key: 'search-result',
     ttl: 900 /* seconds */,
   })
-  async searchPeople(keyword?: string) {
+  async searchPeople(keyword?: string): Promise<Character[]> {
     const url = `${CONFIG.dataSource}/people?search=${keyword ?? ''}`;
     const characters = await this.fetchPeople(url);
 
@@ -31,11 +32,14 @@ export class SwapiService {
     return results;
   }
 
-  private async transformResponse(characters: CharacterResponse[]) {
+  private async transformResponse(characters: CharacterResponse[]): Promise<Character[]> {
+    const imageService = new ImageService();
+
     const promises = characters.map(async (item) => {
       const { name, height, mass, gender } = item;
       const id = (item as any).url.split('/').at(-2) as string;
       const starships = await this.getStarships(item.starships);
+      const image = await imageService.getImage(id);
 
       return {
         id,
@@ -44,6 +48,7 @@ export class SwapiService {
         mass,
         gender,
         starships,
+        image,
       };
     });
 

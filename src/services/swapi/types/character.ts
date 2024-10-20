@@ -7,6 +7,7 @@ export type Character = {
   mass: string;
   gender: string;
   starships: Starship[];
+  image: string;
 };
 
 export type CharacterResponse = {

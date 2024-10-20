@@ -4,7 +4,12 @@ import { Code, Function, Runtime } from 'aws-cdk-lib/aws-lambda';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { Construct } from 'constructs';
 import { resolve } from 'path';
-import { CachePolicy, Distribution } from 'aws-cdk-lib/aws-cloudfront';
+import {
+  CachePolicy,
+  Distribution,
+  OriginRequestPolicy,
+  OriginRequestQueryStringBehavior,
+} from 'aws-cdk-lib/aws-cloudfront';
 import { RestApiOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
 import { AaaaRecord, ARecord, RecordTarget } from 'aws-cdk-lib/aws-route53';
 import { CloudFrontTarget } from 'aws-cdk-lib/aws-route53-targets';
@@ -73,6 +78,9 @@ export class ApiStack extends Stack {
     const cloudfront = new Distribution(this, 'ApiDistribution', {
       defaultBehavior: {
         origin: new RestApiOrigin(this.gateway),
+        originRequestPolicy: new OriginRequestPolicy(this, 'ApiDistributionPolicy', {
+          queryStringBehavior: OriginRequestQueryStringBehavior.allowList('keyword'),
+        }),
         cachePolicy: CachePolicy.CACHING_DISABLED, //disabled cloudfront caching to test application level caching strategies
       },
       domainNames: ['deversity.bgdn.dev'],
